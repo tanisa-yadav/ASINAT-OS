@@ -1,45 +1,22 @@
-[org 0x7c00]
 [bits 16]
-start:
-    cli
-    xor ax, ax
-    mov ds, ax
-    mov es, ax
-    mov ss, ax
-    mov sp, 0x7c00
-    sti
-    mov si, msg_boot
-    call print
-    mov ah, 0x02
-    mov al, 20
-    mov ch, 0
-    mov cl, 2
-    mov dh, 0
-    mov bx, 0x1000
-    int 0x13
-    jc disk_error
-    jmp 0x0000:0x1000
-
-disk_error:
-    mov si, msg_err
-    call print
-    hlt
-
-print:
-    lodsb
-    or al, al
-    jz .done
-    mov ah, 0x0e
-    int 0x10
-    jmp print
-.done: ret
-
-msg_boot db 13,10,'ASINAT IMMORTAL Booted! Proof-of-Boot Mining Started...',13,10,0
-msg_err db 'DISK FAIL - Cannot resurrect',0
-
-times 510-22-($-$$) db 0
-immortal_sig: db 'IMMORTAL'       ; Signature
-stage_marker: db 'C100',0        ; Will become C200
-boot_count_marker: dw 2          ; Your video shows 2, starts from here
-prev_hash_marker: db 'GENESIS_HASH_0000'
-dw 0xaa55
+[org 0x7c00]
+xor ax, ax
+mov ds, ax
+mov es, ax
+mov ss, ax
+mov sp, 0x7c00
+mov si, msg
+mov ah, 0x0E
+.loop:
+lodsb
+test al, al
+jz halt
+int 0x10
+jmp .loop
+halt:
+cli
+hlt
+jmp halt
+msg db 13,10,'ASINAT IMMORTAL OS',13,10,'PRANA: Active',13,10,'Gen: 1 - On-Chain Proof Stored',13,10,0
+times 510-($-$$) db 0
+dw 0xAA55
