@@ -1,15 +1,9 @@
 #!/bin/bash
-set -x
-rm -f *.o *.bin immortal.elf immortal.img
+set -e
 nasm -f bin boot.asm -o boot.bin
-echo "boot done"
-gcc -m32 -ffreestanding -c immortal.c -o immortal.o -nostdlib
-echo "gcc done"
-ld -m elf_i386 -T linker.ld -o immortal.elf immortal.o -nostdlib
-echo "ld done"
-objcopy -O binary immortal.elf immortal.bin
+clang --target=i386-pc-none-elf -ffreestanding -m32 -fno-builtin -nostdlib -c immortal.c -o immortal.o
+ld.lld -T linker.ld -o immortal.elf immortal.o
+llvm-objcopy -O binary immortal.elf immortal.bin
 cat boot.bin immortal.bin > immortal.img
-truncate -s 1474560 immortal.img
 ls -lh immortal.img
-echo "BUILD SUCCESS - NOW BOOTING"
-qemu-system-x86_64 -fda immortal.img
+qemu-system-i386 -fda immortal.img
